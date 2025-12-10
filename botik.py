@@ -17,7 +17,7 @@ from telegram.ext import (
 )
 
 # === НАСТРОЙКИ ===
-TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"  # при желании потом пересоздай у BotFather
+TOKEN = "8456401419:AAGiLcNR3c9lrTxo6MsqIf0P1F0kHC3URtU"  # при желании потом пересоздай у BotFather
 ADMIN_CHAT_ID = -1003389712669  # группа для отстука заявок
 OWNER_ID = 7843476011           # твой личный аккаунт для /broadcast
 
@@ -297,3 +297,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
