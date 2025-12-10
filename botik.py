@@ -16,7 +16,7 @@ from telegram.ext import (
 )
 
 # === НАСТРОЙКИ ===
-TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен
+TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен (лучше потом ревокнуть и заменить)
 ADMIN_CHAT_ID = 4750705274                                  # твой chat_id
 
 # URL твоего сервиса на Render
@@ -119,7 +119,7 @@ async def finish_application(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.send_message(
             chat_id=ADMIN_CHAT_ID,
             text=application_text,
-            parse_mode="Markdown"
+            parse_mode="Markdown",
         )
     except Exception as e:
         logger.error(f"Ошибка отправки админу: {e}")
@@ -144,9 +144,7 @@ def main():
     application = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[
-            MessageHandler(filters.Regex("^Оставить заявку$"), start_application)
-        ],
+        entry_points=[MessageHandler(filters.Regex("^Оставить заявку$"), start_application)],
         states={
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
             CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_contact)],
@@ -160,7 +158,7 @@ def main():
     application.add_handler(MessageHandler(filters.Regex("^Что за обучение\\?$"), info))
     application.add_handler(conv_handler)
 
-    # Webhook-режим для Render Web Service (тут Updater уже норм)
+    # Webhook-режим для Render Web Service
     port = int(os.environ.get("PORT", "8443"))
 
     application.run_webhook(
