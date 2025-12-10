@@ -1,4 +1,6 @@
 import logging
+import os
+
 from telegram import (
     Update,
     ReplyKeyboardMarkup,
@@ -14,11 +16,16 @@ from telegram.ext import (
 )
 
 # === НАСТРОЙКИ ===
-TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"
-ADMIN_CHAT_ID = 4750705274   # сюда твой chat_id (ЦИФРАМИ, без кавычек)
+TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен
+ADMIN_CHAT_ID = 4750705274                                  # твой chat_id
 
+# URL твоего сервиса на Render (если поменяешь имя сервиса — обнови тут)
+WEBHOOK_URL = "https://arba-m14c.onrender.com/webhook"
+
+# Состояния анкеты
 NAME, CONTACT, EXPERIENCE, COMMENT = range(4)
 
+# Логи
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
@@ -26,18 +33,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# === ХЭНДЛЕРЫ ===
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_first = update.effective_user.first_name or ""
     keyboard = [["Оставить заявку"], ["Что за обучение?"]]
     reply_markup = ReplyKeyboardMarkup(
-        keyboard, resize_keyboard=True, one_time_keyboard=False
+        keyboard,
+        resize_keyboard=True,
     )
 
     text = (
         f"Привет, {user_first}!\n\n"
-        "Я бот для записи на обучение арбитражу трафика.\n\n"
-        "Нажми «Оставить заявку», и я задам несколько вопросов. "
-        "После этого отправлю заявку куратору."
+        "Я бот для записи на обучение арбитражу трафика.\n"
+        "Нажми «Оставить заявку», чтобы заполнить короткую форму."
     )
 
     await update.message.reply_text(text, reply_markup=reply_markup)
@@ -45,19 +54,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
-        "Кратко об обучении по арбитражу трафика:\n\n"
-        "• Разбор источников трафика и офферов\n"
-        "• Настройка связок, трекеров, аналитики\n"
-        "• Практика с кураторами и разборы кейсов\n"
-        "• Помощь с первым запуском\n\n"
-        "Если хочешь оставить заявку — нажми «Оставить заявку» 👍"
+        "📚 Обучение арбитражу трафика включает:\n\n"
+        "• Анализ источников трафика\n"
+        "• Настройку рекламных связок\n"
+        "• Работа с трекерами и аналитикой\n"
+        "• Разборы кейсов\n"
+        "• Помощь в запуске первых кампаний\n\n"
+        "Чтобы оставить заявку — нажми «Оставить заявку»."
     )
     await update.message.reply_text(text)
 
 
 async def start_application(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Отлично! Давай познакомимся.\n\n"
         "1️⃣ Как тебя зовут?\n"
         "(Напиши имя и, если хочешь, фамилию)",
         reply_markup=ReplyKeyboardRemove(),
@@ -67,18 +76,15 @@ async def start_application(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["name"] = update.message.text.strip()
-    await update.message.reply_text(
-        "2️⃣ Оставь, пожалуйста, контакт для связи:\n"
-        "— @юзернейм или номер телефона"
-    )
+    await update.message.reply_text("2️⃣ Оставь контакт для связи (@юзернейм или номер):")
     return CONTACT
 
 
 async def get_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["contact"] = update.message.text.strip()
     await update.message.reply_text(
-        "3️⃣ Есть ли у тебя опыт в арбитраже/рекламе?\n"
-        "Кратко опиши (или напиши «нет опыта»)."
+        "3️⃣ Есть ли опыт в арбитраже или рекламе?\n"
+        "(если нет — просто напиши «нет опыта»)"
     )
     return EXPERIENCE
 
@@ -86,8 +92,7 @@ async def get_contact(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_experience(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["experience"] = update.message.text.strip()
     await update.message.reply_text(
-        "4️⃣ Напиши, пожалуйста, дополнительный комментарий:\n"
-        "что ты ожидаешь от обучения, удобное время созвона и т.п.\n"
+        "4️⃣ Добавь комментарий (что ожидаешь от обучения, удобное время созвона).\n"
         "Если нечего добавить — напиши «без комментариев»."
     )
     return COMMENT
@@ -101,26 +106,28 @@ async def finish_application(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     application_text = (
         "📝 *Новая заявка на обучение арбитражу трафика*\n\n"
-        f"👤 Имя: {ud.get('name')}\n"
-        f"📞 Контакт: {ud.get('contact')}\n"
-        f"📊 Опыт: {ud.get('experience')}\n"
-        f"💬 Комментарий: {ud.get('comment')}\n\n"
-        f"TG ID: `{user.id}`"
-        + (f"\nUsername: @{user.username}" if user.username else "")
+        f"👤 Имя: {ud['name']}\n"
+        f"📞 Контакт: {ud['contact']}\n"
+        f"📊 Опыт: {ud['experience']}\n"
+        f"💬 Комментарий: {ud['comment']}\n\n"
+        f"TG ID: `{user.id}`\n"
+        + (f"Username: @{user.username}" if user.username else "")
     )
 
+    # Отправляем заявку админу
     try:
         await context.bot.send_message(
             chat_id=ADMIN_CHAT_ID,
             text=application_text,
-            parse_mode="Markdown",
+            parse_mode="Markdown"
         )
     except Exception as e:
-        logger.error(f"Не удалось отправить заявку админу: {e}")
+        logger.error(f"Ошибка отправки админу: {e}")
 
+    # Ответ пользователю
     await update.message.reply_text(
         "Спасибо! 🙌 Твоя заявка отправлена.\n"
-        "Куратор свяжется с тобой в ближайшее время."
+        "Куратор свяжется с тобой в ближайшее время!"
     )
 
     context.user_data.clear()
@@ -129,17 +136,17 @@ async def finish_application(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
-    await update.message.reply_text(
-        "Заполнение заявки отменено. Если захочешь продолжить — напиши /start."
-    )
+    await update.message.reply_text("Заполнение заявки отменено. Напиши /start, чтобы начать заново.")
     return ConversationHandler.END
 
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    application = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("^Оставить заявку$"), start_application)],
+        entry_points=[
+            MessageHandler(filters.Regex("^Оставить заявку$"), start_application)
+        ],
         states={
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
             CONTACT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_contact)],
@@ -149,11 +156,21 @@ def main():
         fallbacks=[CommandHandler("cancel", cancel)],
     )
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.Regex("^Что за обучение\\?$"), info))
-    app.add_handler(conv_handler)
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.Regex("^Что за обучение\\?$"), info))
+    application.add_handler(conv_handler)
 
-    app.run_polling()
+    # === Webhook-режим для Render Web Service ===
+    # Render даёт порт в переменной PORT
+    port = int(os.environ.get("PORT", "8443"))
+
+    # run_webhook сам поднимет HTTP-сервер и выставит webhook на WEBHOOK_URL
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        url_path="webhook",          # путь внутри сервиса
+        webhook_url=WEBHOOK_URL,     # внешний URL, куда Telegram шлёт апдейты
+    )
 
 
 if __name__ == "__main__":
