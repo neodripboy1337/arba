@@ -7,7 +7,7 @@ from telegram import (
     ReplyKeyboardRemove,
 )
 from telegram.ext import (
-    ApplicationBuilder,
+    Application,
     CommandHandler,
     MessageHandler,
     ConversationHandler,
@@ -19,7 +19,7 @@ from telegram.ext import (
 TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен
 ADMIN_CHAT_ID = 4750705274                                  # твой chat_id
 
-# URL твоего сервиса на Render (если поменяешь имя сервиса — обнови тут)
+# URL твоего сервиса на Render
 WEBHOOK_URL = "https://arba-aj3m.onrender.com/webhook"
 
 # Состояния анкеты
@@ -141,7 +141,13 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    application = ApplicationBuilder().token(TOKEN).build()
+    # ВАЖНО: отключаем Updater, чтобы он не создавался и не падал
+    application = (
+        Application.builder()
+        .token(TOKEN)
+        .updater(None)   # <-- вот эта строка решает проблему
+        .build()
+    )
 
     conv_handler = ConversationHandler(
         entry_points=[
@@ -161,18 +167,15 @@ def main():
     application.add_handler(conv_handler)
 
     # === Webhook-режим для Render Web Service ===
-    # Render даёт порт в переменной PORT
     port = int(os.environ.get("PORT", "8443"))
 
-    # run_webhook сам поднимет HTTP-сервер и выставит webhook на WEBHOOK_URL
     application.run_webhook(
         listen="0.0.0.0",
         port=port,
-        url_path="webhook",          # путь внутри сервиса
-        webhook_url=WEBHOOK_URL,     # внешний URL, куда Telegram шлёт апдейты
+        url_path="webhook",
+        webhook_url=WEBHOOK_URL,
     )
 
 
 if __name__ == "__main__":
     main()
-
