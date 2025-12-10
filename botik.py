@@ -17,7 +17,7 @@ from telegram.ext import (
 
 # === НАСТРОЙКИ ===
 TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен (лучше потом ревокнуть и заменить)
-ADMIN_CHAT_ID = 4750705274                                  # твой chat_id
+ADMIN_CHAT_ID = -1003389712669                                  # твой chat_id
 
 # URL твоего сервиса на Render
 WEBHOOK_URL = "https://arba-aj3m.onrender.com/webhook"
@@ -170,4 +170,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
