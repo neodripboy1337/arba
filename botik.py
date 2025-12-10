@@ -7,7 +7,7 @@ from telegram import (
     ReplyKeyboardRemove,
 )
 from telegram.ext import (
-    Application,
+    ApplicationBuilder,
     CommandHandler,
     MessageHandler,
     ConversationHandler,
@@ -141,13 +141,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    # ВАЖНО: отключаем Updater, чтобы он не создавался и не падал
-    application = (
-        Application.builder()
-        .token(TOKEN)
-        .updater(None)   # <-- вот эта строка решает проблему
-        .build()
-    )
+    application = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
         entry_points=[
@@ -166,7 +160,7 @@ def main():
     application.add_handler(MessageHandler(filters.Regex("^Что за обучение\\?$"), info))
     application.add_handler(conv_handler)
 
-    # === Webhook-режим для Render Web Service ===
+    # Webhook-режим для Render Web Service (тут Updater уже норм)
     port = int(os.environ.get("PORT", "8443"))
 
     application.run_webhook(
