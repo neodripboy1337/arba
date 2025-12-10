@@ -119,7 +119,6 @@ async def finish_application(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await context.bot.send_message(
             chat_id=ADMIN_CHAT_ID,
             text=application_text,
-            parse_mode="Markdown",
         )
     except Exception as e:
         logger.error(f"Ошибка отправки админу: {e}")
@@ -171,3 +170,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
