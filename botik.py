@@ -20,7 +20,7 @@ TOKEN = "7683416658:AAEv9wC3TXJgqtUICdQjzBoDVddOMK3gCKc"   # твой токен
 ADMIN_CHAT_ID = 4750705274                                  # твой chat_id
 
 # URL твоего сервиса на Render (если поменяешь имя сервиса — обнови тут)
-WEBHOOK_URL = "https://arba-m14c.onrender.com/webhook"
+WEBHOOK_URL = "https://arba-aj3m.onrender.com/webhook"
 
 # Состояния анкеты
 NAME, CONTACT, EXPERIENCE, COMMENT = range(4)
@@ -175,3 +175,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
