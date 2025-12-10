@@ -21,7 +21,7 @@ TOKEN = "8456401419:AAGiLcNR3c9lrTxo6MsqIf0P1F0kHC3URtU"  # при желани�
 ADMIN_CHAT_ID = -1003389712669  # группа для отстука заявок
 OWNER_ID = 7843476011           # твой личный ID для /broadcast
 
-WEBHOOK_URL = "https://arba-aj3m.onrender.com/webhook"
+WEBHOOK_URL = "https://arba-9ajo.onrender.com/webhook"
 
 # Состояния анкеты
 CAPTCHA, NAME, EXPERIENCE, COMMENT = range(4)
@@ -274,4 +274,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
